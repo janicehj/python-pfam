@@ -10,7 +10,7 @@ def request (path: str, params: dict = {}, headers: dict = None, timeout: float 
     params.setdefault('output', 'xml')
 
     # Compose the url
-    url = 'http://pfam.xfam.org' + path 
+    url = 'http://pfam-legacy.xfam.org' + path 
 
     # Make the request to pfam
     response = requests.get(url, params=params, headers=headers, timeout=timeout)
@@ -48,7 +48,7 @@ def xml_process_value(value: str):
     if value is None:
         return None
 
-    # This function process only strings 
+    # This function process only strings
     if type(value) != str:
         return value
 
@@ -104,7 +104,7 @@ class PfamEntry:
             return protein(self.id)
 
 class PfamClanMember:
-    
+
     def __init__(self, element: ElementTree):
 
         self.entry           : PfamEntry = PfamEntry('Pfam-A', element.get('id'), element.get('accession'), None)
@@ -125,15 +125,15 @@ class PfamClan:
 
         # Members
         self.families = []
-        
+
         # Process child nodes
         for el in entry:
-            
+
             # Trasform the element curation_details in a object
             if el.tag == 'members':
                 for member in el:
                     self.families.append (PfamClanMember(member))
-            
+
             # Set an attribute of this object using the text content of the element as value
             else:
                 setattr(self, el.tag, el.text)
@@ -151,7 +151,7 @@ class PfarmGOTerm:
         self.id       : str = id
         self.category : str = category
         self.text     : str = text
-        
+
 
 class PfamCurationDetails:
 
@@ -170,7 +170,7 @@ class PfamCurationDetails:
 
         # Process child nodes
         for el in element:
-        
+
             # A special parsing for <num_seqs> tag
             if el.tag == 'num_seqs':
                 self.num_seqs_seed: float = el.find('seed').text
@@ -215,7 +215,7 @@ class PfamHmmDetails:
             # Set an attribute of this object using the text content of the element as value
             else:
                 setattr(self, el.tag, el.text)
-        
+
 
 class PfamFamily:
 
@@ -228,10 +228,10 @@ class PfamFamily:
         # Text of the family
         self.description : str = None
         self.comment     : str = None
-        
+
         # Process child nodes
         for el in entry:
-            
+
             # Trasform the element curation_details in a object
             if el.tag == 'curation_details':
                 self.curation_details: PfamCurationDetails = PfamCurationDetails(el)
@@ -239,7 +239,7 @@ class PfamFamily:
             # Trasform the element hmm_details in a object
             elif el.tag == 'hmm_details':
                 self.hmm_details: PfamHmmDetails = PfamHmmDetails(el)
-            
+
             elif el.tag == 'clan_membership':
                 self.clan_entry : PfamEntry = PfamEntry('Clan', el.get('clan_id'), el.get('clan_acc'), None)
 
@@ -256,7 +256,7 @@ class PfamFamily:
                     # Insert in the list all the terms
                     for term in cat:
                         self.go_terms.append(PfarmGOTerm(term.get('go_id'), category, term.text))
-            
+
             # Set an attribute of this object using the text content of the element as value
             else:
                 setattr(self, el.tag, el.text)
@@ -291,7 +291,7 @@ class PfamMatch:
 
         # Request the family to the server
         return self.entry.fetch()
-            
+
 
 
 class PfamLocation:
@@ -357,11 +357,11 @@ class PfamProtein:
             elif el.tag == 'sequence':
                 self.sequence_version : int = el.get('version')
                 self.sequence         : str = el.text
-                
+
             elif el.tag == 'matches':
                 for match in el:
                     self.matches.append(PfamMatch(match))
-            
+
              # Set an attribute of this object using the text content of the element as value
             else:
                 setattr(self, el.tag, el.text)
@@ -412,7 +412,7 @@ def families() -> [PfamEntry]:
 
         # Split the line in three field
         fields = line.split('\t')
-        
+
         if len(fields) == 3:
             output.append (PfamEntry('Pfam-A', fields[1], fields[0], fields[2]))
 
@@ -432,7 +432,7 @@ def clans() -> [PfamEntry]:
 
         # Split the line in three field
         fields = line.split('\t')
-        
+
         if len(fields) == 3:
             output.append (PfamEntry('Clan', fields[1], fields[0], fields[2]))
 
